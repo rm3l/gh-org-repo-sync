@@ -4,8 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"github.com/rm3l/gh-org-clone/internal/github"
+	"github.com/rm3l/gh-org-clone/internal/repo_sync"
 	"log"
 	"os"
+	"sync"
 )
 
 const defaultBatchSize = 50
@@ -43,12 +45,23 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("found", len(repositories), "repositories")
-	if len(repositories) == 0 {
+	nbRepos := len(repositories)
+	log.Println("found", nbRepos, "repositories")
+	if nbRepos == 0 {
 		os.Exit(0)
 	}
 
-	//TODO Now for each determine whether the directory in the output path exists.
-	// if it does, checkout its main/master branch and update it.
-	// otherwise, clone it
+	var wg sync.WaitGroup
+	wg.Add(nbRepos)
+	for _, repository := range repositories {
+		go func(repo string) {
+			defer wg.Done()
+			err := repo_sync.HandleRepository(organization, repo, output)
+			if err != nil {
+				log.Println("an error occurred while handling repo", repo, err)
+			}
+		}(repository)
+	}
+	wg.Wait()
+	log.Println("done handling", nbRepos, "repositories!")
 }
