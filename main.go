@@ -15,20 +15,27 @@ const defaultBatchSize = 50
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Printf("usage: %s <organization> [-batchSize 10] [protocol ssh|https] [-output /path]", os.Args[0])
+		fmt.Printf("usage: %s <organization> [-batchSize int] [protocol ssh|https|system] [-output /path]", os.Args[0])
 		os.Exit(1)
 	}
-	organization := os.Args[1]
 
 	var batchSize int
 	var output string
 	var protocol string
 	flag.IntVar(&batchSize, "batchSize", defaultBatchSize,
 		"the number of elements to retrieve at once. Must not exceed 100")
-	flag.StringVar(&protocol, "protocol", string(repo_sync.DefaultProtocol), "the protocol to use for cloning")
+	flag.StringVar(&protocol, "protocol", string(repo_sync.DefaultProtocol),
+		fmt.Sprintf("the protocol to use for cloning. Possible values: %s, %s, %s.", repo_sync.DefaultProtocol,
+			repo_sync.SSHProtocol, repo_sync.HTTPSProtocol))
 	flag.StringVar(&output, "output", ".", "the output path")
 	// Ignore errors; CommandLine is set for ExitOnError.
-	_ = flag.CommandLine.Parse(os.Args[2:])
+	if os.Args[1] == "-h" || os.Args[1] == "-help" || os.Args[1] == "--help" {
+		flag.Parse()
+	} else {
+		_ = flag.CommandLine.Parse(os.Args[2:])
+	}
+
+	organization := os.Args[1]
 
 	if batchSize <= 0 || batchSize > 100 {
 		fmt.Printf("invalid batch size (%d). Must be strictly higher than 0 and less than 100",

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cli/go-gh"
+	"github.com/rm3l/gh-org-clone/internal/github"
 	"log"
 	"os"
 )
@@ -11,13 +12,13 @@ import (
 type CloneProtocol string
 
 const (
-	DefaultProtocol CloneProtocol = ""
+	DefaultProtocol CloneProtocol = "system"
 	SSHProtocol     CloneProtocol = "ssh"
 	HTTPSProtocol   CloneProtocol = "https"
 )
 
 // HandleRepository determines whether a directory with the repository name does exist.
-// If it does, it checks out its main/master branch and updates it.
+// If it does, it checks out its default branch and updates it locally.
 // Otherwise, it clones it.
 func HandleRepository(output, organization, repository string, protocol CloneProtocol) error {
 	log.Println("handling repo:", repository)
@@ -37,8 +38,7 @@ func HandleRepository(output, organization, repository string, protocol ClonePro
 		return fmt.Errorf("expected folder for repository '%s'", repoPath)
 	}
 	log.Println("updating local clone for repo:", repoPath)
-	err = updateLocalClone(output, organization, repository)
-	return err
+	return updateLocalClone(output, organization, repository)
 }
 
 func clone(output, organization, repository string, protocol CloneProtocol) error {
@@ -62,6 +62,8 @@ func clone(output, organization, repository string, protocol CloneProtocol) erro
 }
 
 func updateLocalClone(output, organization, repository string) error {
-	//TODO
-	return nil
+	repoPath := fmt.Sprintf("%s/%s", output, repository)
+	args := []string{"repo", "sync", "--source", fmt.Sprintf("%s/%s", organization, repository)}
+	_, _, err := github.RunGhCliInDir(repoPath, nil, args...)
+	return err
 }
