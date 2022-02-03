@@ -7,11 +7,9 @@ import (
 	"time"
 )
 
-const maxPageElements = 10
-
 // GetOrganizationRepos returns an aggregated list of all repositories
 // within a GitHub organization, either private or public
-func GetOrganizationRepos(organization string) ([]string, error) {
+func GetOrganizationRepos(organization string, batchSize int) ([]string, error) {
 	opts := api.ClientOptions{
 		EnableCache: true,
 		Timeout:     10 * time.Second,
@@ -21,14 +19,14 @@ func GetOrganizationRepos(organization string) ([]string, error) {
 		return nil, err
 	}
 	var orgRepositories = make([]string, 0)
-	repositories, totalPagesCount, endCursor, err := getOrganizationRepositories(&client, organization)
+	repositories, totalPagesCount, endCursor, err := getOrganizationRepositories(&client, organization, batchSize)
 	for _, repo := range repositories {
 		orgRepositories = append(orgRepositories, repo)
 	}
 	var after = endCursor
-	if totalPagesCount > maxPageElements {
+	if totalPagesCount > batchSize {
 		for {
-			repositories, endCursor, err := getOrganizationRepositoriesAfter(&client, organization, after)
+			repositories, endCursor, err := getOrganizationRepositoriesAfter(&client, organization, after, batchSize)
 			if err != nil {
 				return nil, err
 			}
@@ -44,7 +42,7 @@ func GetOrganizationRepos(organization string) ([]string, error) {
 	return orgRepositories, nil
 }
 
-func getOrganizationRepositories(client *api.GQLClient, organization string) ([]string, int, string, error) {
+func getOrganizationRepositories(client *api.GQLClient, organization string, batchSize int) ([]string, int, string, error) {
 	var query struct {
 		Organization struct {
 			Repositories struct {
@@ -61,7 +59,7 @@ func getOrganizationRepositories(client *api.GQLClient, organization string) ([]
 	}
 
 	variables := map[string]interface{}{
-		"first": graphql.Int(maxPageElements),
+		"first": graphql.Int(batchSize),
 		"org":   graphql.String(organization),
 	}
 
@@ -77,7 +75,7 @@ func getOrganizationRepositories(client *api.GQLClient, organization string) ([]
 	return repositories, query.Organization.Repositories.TotalCount, query.Organization.Repositories.PageInfo.EndCursor, nil
 }
 
-func getOrganizationRepositoriesAfter(client *api.GQLClient, organization string, after string) ([]string, string, error) {
+func getOrganizationRepositoriesAfter(client *api.GQLClient, organization string, after string, batchSize int) ([]string, string, error) {
 	var query struct {
 		Organization struct {
 			Repositories struct {
@@ -94,7 +92,7 @@ func getOrganizationRepositoriesAfter(client *api.GQLClient, organization string
 	}
 
 	variables := map[string]interface{}{
-		"first": graphql.Int(maxPageElements),
+		"first": graphql.Int(batchSize),
 		"org":   graphql.String(organization),
 		"after": graphql.String(after),
 	}

@@ -8,16 +8,28 @@ import (
 	"os"
 )
 
+const defaultBatchSize = 50
+
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Printf("usage: %s <organization> [-output /path]", os.Args[0])
+		fmt.Printf("usage: %s <organization> [-batchSize 10] [-output /path]", os.Args[0])
 		os.Exit(1)
 	}
 	organization := os.Args[1]
 
+	var batchSize int
 	var output string
-	flag.StringVar(&output, "output", ".", "the output path. Defaults to the current dir")
-	flag.Parse()
+	flag.IntVar(&batchSize, "batchSize", defaultBatchSize,
+		"the number of elements to retrieve at once. Must not exceed 100")
+	flag.StringVar(&output, "output", ".", "the output path")
+	// Ignore errors; CommandLine is set for ExitOnError.
+	_ = flag.CommandLine.Parse(os.Args[2:])
+
+	if batchSize <= 0 || batchSize > 100 {
+		fmt.Printf("invalid batch size (%d). Must be strictly higher than 0 and less than 100",
+			batchSize)
+		os.Exit(1)
+	}
 
 	currentUser, err := github.GetUser()
 	if err != nil {
@@ -27,7 +39,7 @@ func main() {
 	}
 
 	log.Println("trying to list repos in the following organization:", organization)
-	repositories, err := github.GetOrganizationRepos(organization)
+	repositories, err := github.GetOrganizationRepos(organization, batchSize)
 	if err != nil {
 		log.Fatal(err)
 	}
