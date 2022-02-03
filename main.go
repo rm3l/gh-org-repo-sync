@@ -1,26 +1,42 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-
-	"github.com/cli/go-gh"
+	"github.com/rm3l/gh-org-clone/internal/github"
+	"log"
+	"os"
 )
 
 func main() {
-	fmt.Println("hi world, this is the gh-org-clone extension!")
-	client, err := gh.RESTClient(nil)
-	if err != nil {
-		fmt.Println(err)
-		return
+	if len(os.Args) < 2 {
+		fmt.Printf("usage: %s <organization> [-output /path]", os.Args[0])
+		os.Exit(1)
 	}
-	response := struct{ Login string }{}
-	err = client.Get("user", &response)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Printf("running as %s\n", response.Login)
-}
+	organization := os.Args[1]
 
-// For more examples of using go-gh, see:
-// https://github.com/cli/go-gh/blob/trunk/example_gh_test.go
+	var output string
+	flag.StringVar(&output, "output", ".", "the output path. Defaults to the current dir")
+	flag.Parse()
+
+	currentUser, err := github.GetUser()
+	if err != nil {
+		log.Println("could not determine current user:", err)
+	} else {
+		log.Println("running extension as", currentUser)
+	}
+
+	log.Println("trying to list repos in the following organization:", organization)
+	repositories, err := github.GetOrganizationRepos(organization)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("found", len(repositories), "repositories")
+	if len(repositories) == 0 {
+		os.Exit(0)
+	}
+
+	//TODO Now for each determine whether the directory in the output path exists.
+	// if it does, checkout its main/master branch and update it.
+	// otherwise, clone it
+}
