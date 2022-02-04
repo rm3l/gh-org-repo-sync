@@ -1,5 +1,8 @@
 ## gh-org-repo-sync
 
+[![Build](https://github.com/rm3l/gh-org-repo-sync/actions/workflows/build.yml/badge.svg)](https://github.com/rm3l/gh-org-repo-sync/actions/workflows/build.yml)
+
+
 TODO Write description here
 
 ### Working with the source code
