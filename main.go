@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/rm3l/gh-org-clone/internal/github"
-	"github.com/rm3l/gh-org-clone/internal/repo_sync"
+	"github.com/rm3l/gh-org-repo-sync/internal/github"
+	"github.com/rm3l/gh-org-repo-sync/internal/repo_sync"
 	"log"
 	"os"
 	"strings"

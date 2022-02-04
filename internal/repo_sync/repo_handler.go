@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cli/go-gh"
-	"github.com/rm3l/gh-org-clone/internal/github"
+	"github.com/rm3l/gh-org-repo-sync/internal/github"
 	"log"
 	"os"
 )

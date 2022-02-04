@@ -1,4 +1,4 @@
-module github.com/rm3l/gh-org-clone
+module github.com/rm3l/gh-org-repo-sync
 
 go 1.17
 
