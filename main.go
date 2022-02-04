@@ -28,10 +28,10 @@ func main() {
 		fmt.Sprintf("the protocol to use for cloning. Possible values: %s, %s, %s.", repo_sync.DefaultProtocol,
 			repo_sync.SSHProtocol, repo_sync.HTTPSProtocol))
 	flag.StringVar(&output, "output", ".", "the output path")
-	// Ignore errors; CommandLine is set for ExitOnError.
 	if os.Args[1] == "-h" || os.Args[1] == "-help" || os.Args[1] == "--help" {
 		flag.Parse()
 	} else {
+		// Ignore errors since flag.CommandLine is set for ExitOnError.
 		_ = flag.CommandLine.Parse(os.Args[2:])
 	}
 
