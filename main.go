@@ -24,8 +24,8 @@ func main() {
 	var protocol string
 	flag.IntVar(&batchSize, "batchSize", defaultBatchSize,
 		"the number of elements to retrieve at once. Must not exceed 100")
-	flag.StringVar(&protocol, "protocol", string(repo_sync.DefaultProtocol),
-		fmt.Sprintf("the protocol to use for cloning. Possible values: %s, %s, %s.", repo_sync.DefaultProtocol,
+	flag.StringVar(&protocol, "protocol", string(repo_sync.SystemProtocol),
+		fmt.Sprintf("the protocol to use for cloning. Possible values: %s, %s, %s.", repo_sync.SystemProtocol,
 			repo_sync.SSHProtocol, repo_sync.HTTPSProtocol))
 	flag.StringVar(&output, "output", ".", "the output path")
 	if os.Args[1] == "-h" || os.Args[1] == "-help" || os.Args[1] == "--help" {

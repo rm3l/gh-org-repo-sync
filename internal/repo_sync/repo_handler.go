@@ -12,9 +12,9 @@ import (
 type CloneProtocol string
 
 const (
-	DefaultProtocol CloneProtocol = "system"
-	SSHProtocol     CloneProtocol = "ssh"
-	HTTPSProtocol   CloneProtocol = "https"
+	SystemProtocol CloneProtocol = "system"
+	SSHProtocol    CloneProtocol = "ssh"
+	HTTPSProtocol  CloneProtocol = "https"
 )
 
 // HandleRepository determines whether a directory with the repository name does exist.
@@ -43,7 +43,7 @@ func HandleRepository(output, organization, repository string, protocol ClonePro
 func clone(output, organization, repository string, protocol CloneProtocol) error {
 	repoPath := fmt.Sprintf("%s/%s", output, repository)
 	var repoUrl string
-	if protocol == DefaultProtocol {
+	if protocol == SystemProtocol {
 		repoUrl = fmt.Sprintf("%s/%s", organization, repository)
 	} else if protocol == SSHProtocol {
 		repoUrl = fmt.Sprintf("git@github.com:%s/%s.git", organization, repository)
