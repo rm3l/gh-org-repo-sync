@@ -21,7 +21,6 @@ const (
 // If it does, it checks out its default branch and updates it locally.
 // Otherwise, it clones it.
 func HandleRepository(output, organization, repository string, protocol CloneProtocol) error {
-	log.Println("handling repo:", repository)
 	repoPath := fmt.Sprintf("%s/%s", output, repository)
 	info, err := os.Stat(repoPath)
 	if err != nil {
