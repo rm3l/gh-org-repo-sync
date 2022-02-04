@@ -48,7 +48,7 @@ func clone(output, organization, repository string, protocol CloneProtocol) erro
 	} else if protocol == SSHProtocol {
 		repoUrl = fmt.Sprintf("git@github.com:%s/%s.git", organization, repository)
 	} else if protocol == HTTPSProtocol {
-		repoUrl = fmt.Sprintf("https://github.com2/%s/%s.git", organization, repository)
+		repoUrl = fmt.Sprintf("https://github.com/%s/%s.git", organization, repository)
 	} else {
 		return fmt.Errorf("unknown protocol for cloning: %s", protocol)
 	}
