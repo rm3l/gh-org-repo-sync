@@ -44,13 +44,6 @@ func main() {
 	}
 	cloneProtocol := repo_sync.CloneProtocol(strings.ToLower(protocol))
 
-	currentUser, err := github.GetUser()
-	if err != nil {
-		log.Println("could not determine current user:", err)
-	} else {
-		log.Println("running extension as", currentUser)
-	}
-
 	log.Println("trying to list repos in the following organization:", organization)
 	repositories, err := github.GetOrganizationRepos(organization, batchSize)
 	if err != nil {
