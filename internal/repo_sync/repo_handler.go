@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cli/go-gh"
+	"github.com/go-git/go-git/v5"
 	"github.com/rm3l/gh-org-repo-sync/internal/github"
 	"log"
 	"os"
+	"sync"
 )
 
 type CloneProtocol string
@@ -62,7 +64,36 @@ func clone(output, organization, repository string, protocol CloneProtocol) erro
 
 func updateLocalClone(output, organization, repository string) error {
 	repoPath := fmt.Sprintf("%s/%s", output, repository)
+	err := fetchAllRemotes(repoPath)
+	if err != nil {
+		log.Println("[warn]", err)
+	}
 	args := []string{"repo", "sync", "--source", fmt.Sprintf("%s/%s", organization, repository)}
-	_, _, err := github.RunGhCliInDir(repoPath, nil, args...)
+	_, _, err = github.RunGhCliInDir(repoPath, nil, args...)
 	return err
+}
+
+func fetchAllRemotes(repoPath string) error {
+	r, err := git.PlainOpen(repoPath)
+	var errorReturned error
+	if err != nil {
+		errorReturned = err
+	} else {
+		remotes, err := r.Remotes()
+		if err != nil {
+			errorReturned = err
+		} else {
+			var wg sync.WaitGroup
+			wg.Add(len(remotes))
+			for _, remote := range remotes {
+				go func(rem *git.Remote) {
+					defer wg.Done()
+					log.Printf("[info] fetching remote '%s' in %s", rem.Config().Name, repoPath)
+					_ = rem.Fetch(&git.FetchOptions{Depth: 0, Tags: git.AllTags})
+				}(remote)
+			}
+			wg.Wait()
+		}
+	}
+	return errorReturned
 }
