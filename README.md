@@ -21,7 +21,7 @@ gh extension install rm3l/gh-org-repo-sync
 ```bash
 ❯ gh org-repo-sync -h
 
-Usage of gh-org-repo-sync: ~/.local/share/gh/extensions/gh-org-repo-sync/gh-org-repo-sync <organization> [options]
+Usage: gh org-repo-sync <organization> [options]
 Options: 
   -batchSize int
         the number of elements to retrieve at once. Must not exceed 100 (default 50)

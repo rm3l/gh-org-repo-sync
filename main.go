@@ -27,7 +27,8 @@ func main() {
 	var output string
 	var protocol string
 	flag.StringVar(&query, "query", "",
-		`GitHub search query, to filter the Organization repositories. Example: "language:Go stars:>10 pushed:>2010-11-12"
+		`GitHub search query, to filter the Organization repositories.
+Example: "language:Go stars:>10 pushed:>2010-11-12"
 See https://bit.ly/3HurHe3 for more details on the search syntax`)
 	flag.IntVar(&batchSize, "batchSize", defaultBatchSize,
 		"the number of elements to retrieve at once. Must not exceed 100")
@@ -37,7 +38,7 @@ See https://bit.ly/3HurHe3 for more details on the search syntax`)
 	flag.StringVar(&output, "output", ".", "the output path")
 	flag.Usage = func() {
 		//goland:noinspection GoUnhandledErrorResult
-		fmt.Fprintf(os.Stderr, "Usage of gh-org-repo-sync: %s <organization> [options]\n", os.Args[0])
+		fmt.Fprintln(os.Stderr, "Usage: gh org-repo-sync <organization> [options]")
 		fmt.Println("Options: ")
 		flag.PrintDefaults()
 	}
