@@ -27,7 +27,7 @@ func HandleRepository(output, organization, repository string, protocol ClonePro
 	info, err := os.Stat(repoPath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			log.Println("cloning repo because local folder not found:", repoPath)
+			log.Println("[debug] cloning repo because local folder not found:", repoPath)
 			if err := clone(output, organization, repository, protocol); err != nil {
 				return err
 			}
@@ -38,7 +38,7 @@ func HandleRepository(output, organization, repository string, protocol ClonePro
 	if !info.IsDir() {
 		return fmt.Errorf("expected folder for repository '%s'", repoPath)
 	}
-	log.Println("updating local clone for repo:", repoPath)
+	log.Println("[debug] updating local clone for repo:", repoPath)
 	return updateLocalClone(output, organization, repository)
 }
 
@@ -88,7 +88,7 @@ func fetchAllRemotes(repoPath string) error {
 			for _, remote := range remotes {
 				go func(rem *git.Remote) {
 					defer wg.Done()
-					log.Printf("[info] fetching remote '%s' in %s", rem.Config().Name, repoPath)
+					log.Printf("[debug] fetching remote '%s' in %s", rem.Config().Name, repoPath)
 					_ = rem.Fetch(&git.FetchOptions{Depth: 0, Tags: git.AllTags})
 				}(remote)
 			}

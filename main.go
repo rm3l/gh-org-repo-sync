@@ -14,8 +14,13 @@ import (
 
 const defaultBatchSize = 50
 
+var nbRepos int
+
 func main() {
 	start := time.Now()
+	defer func() {
+		log.Println("[info] done handling", nbRepos, "repositories in", time.Now().Sub(start))
+	}()
 
 	var query string
 	var batchSize int
@@ -55,15 +60,14 @@ See https://bit.ly/3HurHe3 for more details on the search syntax`)
 	}
 	cloneProtocol := repo_sync.CloneProtocol(strings.ToLower(protocol))
 
-	log.Println("trying to list repos in the following organization:", organization)
 	repositories, err := github.GetOrganizationRepos(organization, query, batchSize)
 	if err != nil {
 		log.Fatal(err)
 	}
-	nbRepos := len(repositories)
-	log.Println("found", nbRepos, "repositories")
+	nbRepos = len(repositories)
+	log.Println("[debug] found", nbRepos, "repositories")
 	if nbRepos == 0 {
-		os.Exit(0)
+		return
 	}
 
 	var wg sync.WaitGroup
@@ -73,10 +77,9 @@ See https://bit.ly/3HurHe3 for more details on the search syntax`)
 			defer wg.Done()
 			err := repo_sync.HandleRepository(output, organization, repo, cloneProtocol)
 			if err != nil {
-				log.Println("an error occurred while handling repo", repo, err)
+				log.Println("[warn] an error occurred while handling repo", repo, err)
 			}
 		}(repository)
 	}
 	wg.Wait()
-	log.Println("done handling", nbRepos, "repositories in", time.Now().Sub(start))
 }
