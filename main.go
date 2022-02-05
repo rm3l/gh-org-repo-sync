@@ -78,7 +78,7 @@ See https://bit.ly/3HurHe3 for more details on the search syntax`)
 	var wg sync.WaitGroup
 	wg.Add(nbRepos)
 	for _, repository := range repositories {
-		go func(repo string) {
+		go func(repo github.RepositoryInfo) {
 			defer wg.Done()
 			err := repo_sync.HandleRepository(dryRun, output, organization, repo, cloneProtocol)
 			if err != nil {

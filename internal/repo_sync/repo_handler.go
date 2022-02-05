@@ -23,7 +23,8 @@ const (
 // HandleRepository determines whether a directory with the repository name does exist.
 // If it does, it checks out its default branch and updates it locally.
 // Otherwise, it clones it.
-func HandleRepository(dryRun bool, output, organization, repository string, protocol CloneProtocol) error {
+func HandleRepository(dryRun bool, output, organization string, repositoryInfo github.RepositoryInfo, protocol CloneProtocol) error {
+	repository := repositoryInfo.Name
 	repoPath, err := filepath.Abs(filepath.FromSlash(fmt.Sprintf("%s/%s", output, repository)))
 	if err != nil {
 		return err
@@ -51,10 +52,10 @@ func HandleRepository(dryRun bool, output, organization, repository string, prot
 		return nil
 	}
 	log.Println("[debug] updating local clone for repo:", repoPath)
-	return updateLocalClone(output, organization, repository)
+	return updateLocalClone(output, organization, repositoryInfo)
 }
 
-func clone(output, organization, repository string, protocol CloneProtocol) error {
+func clone(output, organization string, repository string, protocol CloneProtocol) error {
 	repoPath := fmt.Sprintf("%s/%s", output, repository)
 	var repoUrl string
 	if protocol == SystemProtocol {
@@ -74,11 +75,16 @@ func clone(output, organization, repository string, protocol CloneProtocol) erro
 	return err
 }
 
-func updateLocalClone(output, organization, repository string) error {
+func updateLocalClone(output, organization string, repositoryInfo github.RepositoryInfo) error {
+	repository := repositoryInfo.Name
 	repoPath := fmt.Sprintf("%s/%s", output, repository)
 	err := fetchAllRemotes(repoPath)
 	if err != nil {
 		log.Println("[warn]", err)
+	}
+	if repositoryInfo.IsEmpty {
+		log.Printf("[warn] skipped syncing empty repo: %s. Only remotes have been fetched\n", repoPath)
+		return nil
 	}
 	args := []string{"repo", "sync", "--source", fmt.Sprintf("%s/%s", organization, repository)}
 	_, _, err = github.RunGhCliInDir(repoPath, nil, args...)
