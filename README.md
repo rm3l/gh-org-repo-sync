@@ -25,7 +25,7 @@ gh extension install rm3l/gh-org-repo-sync
 
 Usage: gh org-repo-sync <organization> [options]
 Options: 
-  -batchSize int
+  -batch-size int
         the number of elements to retrieve at once. Must not exceed 100 (default 50)
   -dry-run
         dry run mode. to display the repositories that will get cloned or updated, 

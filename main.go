@@ -34,7 +34,7 @@ without actually performing those actions`)
 		`GitHub search query, to filter the Organization repositories.
 Example: "language:Go stars:>10 pushed:>2010-11-12"
 See https://bit.ly/3HurHe3 for more details on the search syntax`)
-	flag.IntVar(&batchSize, "batchSize", defaultBatchSize,
+	flag.IntVar(&batchSize, "batch-size", defaultBatchSize,
 		"the number of elements to retrieve at once. Must not exceed 100")
 	flag.StringVar(&protocol, "protocol", string(repo_sync.SystemProtocol),
 		fmt.Sprintf("the protocol to use for cloning. Possible values: %s, %s, %s.", repo_sync.SystemProtocol,
