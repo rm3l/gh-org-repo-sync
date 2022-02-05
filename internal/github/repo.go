@@ -51,9 +51,7 @@ func GetOrganizationRepos(organization string, query string, batchSize int) ([]R
 	}
 	var orgRepositories = make([]RepositoryInfo, 0)
 	organizationResponse, err := getOrganizationRepositories(&client, queryString, batchSize)
-	for _, repo := range organizationResponse.repositories {
-		orgRepositories = append(orgRepositories, repo)
-	}
+	orgRepositories = append(orgRepositories, organizationResponse.repositories...)
 	var after = organizationResponse.endCursor
 	if organizationResponse.repositoryCount > batchSize {
 		for {
@@ -61,9 +59,7 @@ func GetOrganizationRepos(organization string, query string, batchSize int) ([]R
 			if err != nil {
 				return nil, err
 			}
-			for _, repo := range organizationResponse.repositories {
-				orgRepositories = append(orgRepositories, repo)
-			}
+			orgRepositories = append(orgRepositories, organizationResponse.repositories...)
 			if organizationResponse.endCursor == "" {
 				break
 			}
