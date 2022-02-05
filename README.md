@@ -1,4 +1,4 @@
-## gh-org-repo-sync
+# gh-org-repo-sync
 
 [![Build](https://github.com/rm3l/gh-org-repo-sync/actions/workflows/build.yml/badge.svg)](https://github.com/rm3l/gh-org-repo-sync/actions/workflows/build.yml)
 
@@ -6,23 +6,22 @@
 
 > GitHub CLI extension to clone repositories in a GitHub Organization and update their default branch if already cloned
 
-### Installation
-
-This requires at least the 2.0.0+ version of the GitHub CLI to support extensions.
+## Installation
 
 - Install the `gh` CLI. See [https://github.com/cli/cli#installation](https://github.com/cli/cli#installation) for further details.
+- Run `gh auth login` to authenticate with your GitHub account. Alternatively, the CLI will respect the `GITHUB_TOKEN` [environment variable](https://cli.github.com/manual/gh_help_environment).
 - Install this extension:
 
 ```bash
 gh extension install rm3l/gh-org-repo-sync
 ```
 
-### Usage
+## Usage
 
 ```bash
 ❯ gh org-repo-sync -h
 
-Usage of gh-org-repo-sync: /home/rm3l/.local/share/gh/extensions/gh-org-repo-sync/gh-org-repo-sync <organization> [options]
+Usage of gh-org-repo-sync: ~/.local/share/gh/extensions/gh-org-repo-sync/gh-org-repo-sync <organization> [options]
 Options: 
   -batchSize int
         the number of elements to retrieve at once. Must not exceed 100 (default 50)
@@ -33,8 +32,6 @@ Options:
   -query string
         GitHub search query, to filter the Organization repositories. Example: "language:Go stars:>10 pushed:>2010-11-12"
         See https://bit.ly/3HurHe3 for more details on the search syntax
-
-
 ```
 
 ### Working with the source code
