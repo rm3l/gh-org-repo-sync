@@ -23,7 +23,7 @@ const (
 // HandleRepository determines whether a directory with the repository name does exist.
 // If it does, it checks out its default branch and updates it locally.
 // Otherwise, it clones it.
-func HandleRepository(output, organization, repository string, protocol CloneProtocol) error {
+func HandleRepository(dryRun bool, output, organization, repository string, protocol CloneProtocol) error {
 	repoPath, err := filepath.Abs(filepath.FromSlash(fmt.Sprintf("%s/%s", output, repository)))
 	if err != nil {
 		return err
@@ -31,6 +31,10 @@ func HandleRepository(output, organization, repository string, protocol ClonePro
 	info, err := os.Stat(repoPath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
+			if dryRun {
+				fmt.Printf("=> %s/%s: new clone in '%s'\n", organization, repository, repoPath)
+				return nil
+			}
 			log.Println("[debug] cloning repo because local folder not found:", repoPath)
 			if err := clone(output, organization, repository, protocol); err != nil {
 				return err
@@ -41,6 +45,10 @@ func HandleRepository(output, organization, repository string, protocol ClonePro
 	}
 	if !info.IsDir() {
 		return fmt.Errorf("expected folder for repository '%s'", repoPath)
+	}
+	if dryRun {
+		fmt.Printf("=> %s/%s: update in '%s'\n", organization, repository, repoPath)
+		return nil
 	}
 	log.Println("[debug] updating local clone for repo:", repoPath)
 	return updateLocalClone(output, organization, repository)

@@ -22,10 +22,14 @@ func main() {
 		log.Println("[info] done handling", nbRepos, "repositories in", time.Now().Sub(start))
 	}()
 
+	var dryRun bool
 	var query string
 	var batchSize int
 	var output string
 	var protocol string
+	flag.BoolVar(&dryRun, "dry-run", false,
+		`dry run mode. to display the repos that will get cloned or updated, 
+without actually performing those actions`)
 	flag.StringVar(&query, "query", "",
 		`GitHub search query, to filter the Organization repositories.
 Example: "language:Go stars:>10 pushed:>2010-11-12"
@@ -76,7 +80,7 @@ See https://bit.ly/3HurHe3 for more details on the search syntax`)
 	for _, repository := range repositories {
 		go func(repo string) {
 			defer wg.Done()
-			err := repo_sync.HandleRepository(output, organization, repo, cloneProtocol)
+			err := repo_sync.HandleRepository(dryRun, output, organization, repo, cloneProtocol)
 			if err != nil {
 				log.Println("[warn] an error occurred while handling repo", repo, err)
 			}
