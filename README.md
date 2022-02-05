@@ -4,7 +4,8 @@
 [![CodeQL Analysis](https://github.com/rm3l/gh-org-repo-sync/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/rm3l/gh-org-repo-sync/actions/workflows/codeql-analysis.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/rm3l/gh-org-repo-sync)](https://goreportcard.com/report/github.com/rm3l/gh-org-repo-sync)
 
-> GitHub CLI extension to clone repositories in a GitHub Organization and update their default branch if already cloned
+> GitHub CLI extension to clone all repositories in a GitHub Organization, with the ability to filter via GitHub search queries.
+> If a local clone already exists, it fetches all remotes and pulls changes from the default branch.
 
 ## Installation
 
