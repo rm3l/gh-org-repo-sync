@@ -16,10 +16,6 @@ const defaultBatchSize = 50
 
 func main() {
 	start := time.Now()
-	if len(os.Args) < 2 {
-		fmt.Printf("usage: %s <organization> [-batchSize int] [protocol ssh|https|system] [-output /path]", os.Args[0])
-		os.Exit(1)
-	}
 
 	var query string
 	var batchSize int
@@ -27,25 +23,33 @@ func main() {
 	var protocol string
 	flag.StringVar(&query, "query", "",
 		`GitHub search query, to filter the Organization repositories. Example: "language:Go stars:>10 pushed:>2010-11-12"
-See https://bit.ly/3HurHe3 for more details on the search syntax
-`)
+See https://bit.ly/3HurHe3 for more details on the search syntax`)
 	flag.IntVar(&batchSize, "batchSize", defaultBatchSize,
 		"the number of elements to retrieve at once. Must not exceed 100")
 	flag.StringVar(&protocol, "protocol", string(repo_sync.SystemProtocol),
 		fmt.Sprintf("the protocol to use for cloning. Possible values: %s, %s, %s.", repo_sync.SystemProtocol,
 			repo_sync.SSHProtocol, repo_sync.HTTPSProtocol))
 	flag.StringVar(&output, "output", ".", "the output path")
-	if os.Args[1] == "-h" || os.Args[1] == "-help" || os.Args[1] == "--help" {
-		flag.Parse()
+	flag.Usage = func() {
+		//goland:noinspection GoUnhandledErrorResult
+		fmt.Fprintf(os.Stderr, "Usage of gh-org-repo-sync: %s <organization> [options]\n", os.Args[0])
+		fmt.Println("Options: ")
+		flag.PrintDefaults()
+	}
+
+	organization := os.Args[1]
+
+	if organization == "-h" || organization == "-help" || organization == "--help" {
+		flag.Usage()
+		os.Exit(1)
 	} else {
 		// Ignore errors since flag.CommandLine is set for ExitOnError.
 		_ = flag.CommandLine.Parse(os.Args[2:])
 	}
 
-	organization := os.Args[1]
-
 	if batchSize <= 0 || batchSize > 100 {
-		fmt.Printf("invalid batch size (%d). Must be strictly higher than 0 and less than 100",
+		//goland:noinspection GoUnhandledErrorResult
+		fmt.Fprintf(os.Stderr, "invalid batch size (%d). Must be strictly higher than 0 and less than 100",
 			batchSize)
 		os.Exit(1)
 	}
