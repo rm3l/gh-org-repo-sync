@@ -8,6 +8,7 @@ import (
 	"github.com/rm3l/gh-org-repo-sync/internal/github"
 	"log"
 	"os"
+	"path/filepath"
 	"sync"
 )
 
@@ -23,7 +24,10 @@ const (
 // If it does, it checks out its default branch and updates it locally.
 // Otherwise, it clones it.
 func HandleRepository(output, organization, repository string, protocol CloneProtocol) error {
-	repoPath := fmt.Sprintf("%s/%s", output, repository)
+	repoPath, err := filepath.Abs(filepath.FromSlash(fmt.Sprintf("%s/%s", output, repository)))
+	if err != nil {
+		return err
+	}
 	info, err := os.Stat(repoPath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
