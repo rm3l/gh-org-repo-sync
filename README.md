@@ -37,7 +37,7 @@ Options:
 
 ## Working with the source code
 
-- [Go 1.17+](https://go.dev/doc/install) is required
+- If not done already, download and install [Go](https://go.dev/doc/install) to build the project
 - Clone the repository and install the local version.
 
 ```bash
