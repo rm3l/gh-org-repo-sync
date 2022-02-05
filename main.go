@@ -9,11 +9,13 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
 
 const defaultBatchSize = 50
 
 func main() {
+	start := time.Now()
 	if len(os.Args) < 2 {
 		fmt.Printf("usage: %s <organization> [-batchSize int] [protocol ssh|https|system] [-output /path]", os.Args[0])
 		os.Exit(1)
@@ -67,5 +69,5 @@ func main() {
 		}(repository)
 	}
 	wg.Wait()
-	log.Println("done handling", nbRepos, "repositories!")
+	log.Println("done handling", nbRepos, "repositories in", time.Now().Sub(start))
 }
