@@ -20,19 +20,26 @@ gh extension install rm3l/gh-org-repo-sync
 ### Usage
 
 ```bash
-gh org-repo-sync -h
-Usage of ~/.local/share/gh/extensions/gh-org-repo-sync/gh-org-repo-sync:
+❯ gh org-repo-sync -h
+
+Usage of gh-org-repo-sync: /home/rm3l/.local/share/gh/extensions/gh-org-repo-sync/gh-org-repo-sync <organization> [options]
+Options: 
   -batchSize int
         the number of elements to retrieve at once. Must not exceed 100 (default 50)
   -output string
         the output path (default ".")
   -protocol string
         the protocol to use for cloning. Possible values: system, ssh, https. (default "system")
+  -query string
+        GitHub search query, to filter the Organization repositories. Example: "language:Go stars:>10 pushed:>2010-11-12"
+        See https://bit.ly/3HurHe3 for more details on the search syntax
+
+
 ```
 
 ### Working with the source code
 
-Once you clone this repository, you can install a symbolic link to this in the `gh` CLI repositories cache.
+Clone the repository and install the local version.
 
 ```bash
 cd gh-org-repo-sync
