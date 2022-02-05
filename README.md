@@ -1,6 +1,7 @@
 # gh-org-repo-sync
 
 [![Build](https://github.com/rm3l/gh-org-repo-sync/actions/workflows/build.yml/badge.svg)](https://github.com/rm3l/gh-org-repo-sync/actions/workflows/build.yml)
+[![Lint](https://github.com/rm3l/gh-org-repo-sync/actions/workflows/lint.yml/badge.svg)](https://github.com/rm3l/gh-org-repo-sync/actions/workflows/lint.yml)
 [![CodeQL Analysis](https://github.com/rm3l/gh-org-repo-sync/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/rm3l/gh-org-repo-sync/actions/workflows/codeql-analysis.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/rm3l/gh-org-repo-sync)](https://goreportcard.com/report/github.com/rm3l/gh-org-repo-sync)
 
