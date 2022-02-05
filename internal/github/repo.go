@@ -10,9 +10,20 @@ import (
 	"time"
 )
 
+type RepositoryInfo struct {
+	Name    string
+	IsEmpty bool
+}
+
+type organizationResponse struct {
+	repositories    []RepositoryInfo
+	repositoryCount int
+	endCursor       string
+}
+
 // GetOrganizationRepos returns an aggregated list of all repositories
 // within a GitHub organization, either private or public
-func GetOrganizationRepos(organization string, query string, batchSize int) ([]string, error) {
+func GetOrganizationRepos(organization string, query string, batchSize int) ([]RepositoryInfo, error) {
 	organizationSearchQuery := fmt.Sprintf("org:\"%s\"", organization)
 	var queryString string
 	if strings.Contains(query, organizationSearchQuery) {
@@ -38,49 +49,51 @@ func GetOrganizationRepos(organization string, query string, batchSize int) ([]s
 	if err != nil {
 		return nil, err
 	}
-	var orgRepositories = make([]string, 0)
-	repositories, repositoryCount, endCursor, err := getOrganizationRepositories(&client, queryString, batchSize)
-	for _, repo := range repositories {
+	var orgRepositories = make([]RepositoryInfo, 0)
+	organizationResponse, err := getOrganizationRepositories(&client, queryString, batchSize)
+	for _, repo := range organizationResponse.repositories {
 		orgRepositories = append(orgRepositories, repo)
 	}
-	var after = endCursor
-	if repositoryCount > batchSize {
+	var after = organizationResponse.endCursor
+	if organizationResponse.repositoryCount > batchSize {
 		for {
-			repositories, endCursor, err := getOrganizationRepositoriesAfter(&client, queryString, batchSize, after)
+			organizationResponse, err := getOrganizationRepositoriesAfter(&client, queryString, batchSize, after)
 			if err != nil {
 				return nil, err
 			}
-			for _, repo := range repositories {
+			for _, repo := range organizationResponse.repositories {
 				orgRepositories = append(orgRepositories, repo)
 			}
-			if endCursor == "" {
+			if organizationResponse.endCursor == "" {
 				break
 			}
-			after = endCursor
+			after = organizationResponse.endCursor
 		}
 	}
 	return orgRepositories, nil
 }
 
 type RepositoryFragment struct {
-	Name string
+	Name    string
+	IsEmpty bool
 }
 
-func getOrganizationRepositories(client *api.GQLClient, queryString string, batchSize int) ([]string, int, string, error) {
+func getOrganizationRepositories(client *api.GQLClient, queryString string, batchSize int) (organizationResponse, error) {
 	/*
-		search(type: REPOSITORY, query: $query, first: $first) {
-		    pageInfo {
-		      endCursor
-		      startCursor
-		    }
-		    repositoryCount
-		    repos: edges {
-		      repo: node {
-		        ... on Repository {
-		          name
-			  }
+			search(type: REPOSITORY, query: $query, first: $first) {
+			    pageInfo {
+			      endCursor
+			      startCursor
+			    }
+			    repositoryCount
+			    repos: edges {
+			      repo: node {
+			        ... on Repository {
+			          name
+		              isEmpty
+				  }
+				}
 			}
-		}
 	*/
 	var query struct {
 		Search struct {
@@ -103,17 +116,24 @@ func getOrganizationRepositories(client *api.GQLClient, queryString string, batc
 
 	err := (*client).Query("OrganizationRepositories", &query, variables)
 	if err != nil {
-		return nil, 0, "", err
+		return organizationResponse{}, err
 	}
 
-	repositories := make([]string, 0)
+	repositories := make([]RepositoryInfo, 0)
 	for _, r := range query.Search.Repos {
-		repositories = append(repositories, r.Repo.Name)
+		repositories = append(repositories, RepositoryInfo{
+			Name:    r.Repo.Name,
+			IsEmpty: r.Repo.IsEmpty,
+		})
 	}
-	return repositories, query.Search.RepositoryCount, query.Search.PageInfo.EndCursor, nil
+	return organizationResponse{
+		repositories:    repositories,
+		repositoryCount: query.Search.RepositoryCount,
+		endCursor:       query.Search.PageInfo.EndCursor,
+	}, nil
 }
 
-func getOrganizationRepositoriesAfter(client *api.GQLClient, queryString string, batchSize int, after string) ([]string, string, error) {
+func getOrganizationRepositoriesAfter(client *api.GQLClient, queryString string, batchSize int, after string) (organizationResponse, error) {
 	var query struct {
 		Search struct {
 			PageInfo struct {
@@ -136,12 +156,19 @@ func getOrganizationRepositoriesAfter(client *api.GQLClient, queryString string,
 
 	err := (*client).Query("OrganizationRepositoriesAfter", &query, variables)
 	if err != nil {
-		return nil, "", err
+		return organizationResponse{}, err
 	}
 
-	repositories := make([]string, 0)
+	repositories := make([]RepositoryInfo, 0)
 	for _, r := range query.Search.Repos {
-		repositories = append(repositories, r.Repo.Name)
+		repositories = append(repositories, RepositoryInfo{
+			Name:    r.Repo.Name,
+			IsEmpty: r.Repo.IsEmpty,
+		})
 	}
-	return repositories, query.Search.PageInfo.EndCursor, nil
+	return organizationResponse{
+		repositories:    repositories,
+		repositoryCount: query.Search.RepositoryCount,
+		endCursor:       query.Search.PageInfo.EndCursor,
+	}, nil
 }
