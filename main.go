@@ -21,9 +21,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	var query string
 	var batchSize int
 	var output string
 	var protocol string
+	flag.StringVar(&query, "query", "",
+		`GitHub search query, to filter the Organization repositories. Example: "language:Go stars:>10 pushed:>2010-11-12"
+See https://bit.ly/3HurHe3 for more details on the search syntax
+`)
 	flag.IntVar(&batchSize, "batchSize", defaultBatchSize,
 		"the number of elements to retrieve at once. Must not exceed 100")
 	flag.StringVar(&protocol, "protocol", string(repo_sync.SystemProtocol),
@@ -47,7 +52,7 @@ func main() {
 	cloneProtocol := repo_sync.CloneProtocol(strings.ToLower(protocol))
 
 	log.Println("trying to list repos in the following organization:", organization)
-	repositories, err := github.GetOrganizationRepos(organization, batchSize)
+	repositories, err := github.GetOrganizationRepos(organization, query, batchSize)
 	if err != nil {
 		log.Fatal(err)
 	}

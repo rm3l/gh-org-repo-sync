@@ -1,15 +1,35 @@
 package github
 
 import (
+	"fmt"
 	"github.com/cli/go-gh"
 	"github.com/cli/go-gh/pkg/api"
 	graphql "github.com/cli/shurcooL-graphql"
+	"log"
+	"strings"
 	"time"
 )
 
 // GetOrganizationRepos returns an aggregated list of all repositories
 // within a GitHub organization, either private or public
-func GetOrganizationRepos(organization string, batchSize int) ([]string, error) {
+func GetOrganizationRepos(organization string, query string, batchSize int) ([]string, error) {
+	organizationSearchQuery := fmt.Sprintf("org:\"%s\"", organization)
+	var queryString string
+	if strings.Contains(query, organizationSearchQuery) {
+		queryString = query
+	} else {
+		if query != "" {
+			queryString = fmt.Sprintf("%s %s", organizationSearchQuery, query)
+		} else {
+			queryString = organizationSearchQuery
+		}
+	}
+	if !strings.Contains(query, "fork:") {
+		//Include forks by default
+		queryString += " fork:true"
+	}
+	log.Println("[debug] queryString", queryString)
+
 	opts := api.ClientOptions{
 		EnableCache: true,
 		Timeout:     10 * time.Second,
@@ -19,14 +39,14 @@ func GetOrganizationRepos(organization string, batchSize int) ([]string, error) 
 		return nil, err
 	}
 	var orgRepositories = make([]string, 0)
-	repositories, totalPagesCount, endCursor, err := getOrganizationRepositories(&client, organization, batchSize)
+	repositories, repositoryCount, endCursor, err := getOrganizationRepositories(&client, queryString, batchSize)
 	for _, repo := range repositories {
 		orgRepositories = append(orgRepositories, repo)
 	}
 	var after = endCursor
-	if totalPagesCount > batchSize {
+	if repositoryCount > batchSize {
 		for {
-			repositories, endCursor, err := getOrganizationRepositoriesAfter(&client, organization, after, batchSize)
+			repositories, endCursor, err := getOrganizationRepositoriesAfter(&client, queryString, batchSize, after)
 			if err != nil {
 				return nil, err
 			}
@@ -42,25 +62,43 @@ func GetOrganizationRepos(organization string, batchSize int) ([]string, error) 
 	return orgRepositories, nil
 }
 
-func getOrganizationRepositories(client *api.GQLClient, organization string, batchSize int) ([]string, int, string, error) {
-	var query struct {
-		Organization struct {
-			Repositories struct {
-				TotalCount int
-				PageInfo   struct {
-					StartCursor string
-					EndCursor   string
-				}
-				Nodes []struct {
-					Name string
-				}
-			} `graphql:"repositories(first: $first)"`
-		} `graphql:"organization(login: $org)"`
-	}
+type RepositoryFragment struct {
+	Name string
+}
 
+func getOrganizationRepositories(client *api.GQLClient, queryString string, batchSize int) ([]string, int, string, error) {
+	/*
+		search(type: REPOSITORY, query: $query, first: $first) {
+		    pageInfo {
+		      endCursor
+		      startCursor
+		    }
+		    repositoryCount
+		    repos: edges {
+		      repo: node {
+		        ... on Repository {
+		          name
+			  }
+			}
+		}
+	*/
+	var query struct {
+		Search struct {
+			PageInfo struct {
+				StartCursor string
+				EndCursor   string
+			}
+			RepositoryCount int
+			Repos           []struct {
+				Repo struct {
+					RepositoryFragment `graphql:"... on Repository"`
+				} `graphql:"repo: node"`
+			} `graphql:"repos: edges"`
+		} `graphql:"search(type: REPOSITORY, query: $query, first: $first)"`
+	}
 	variables := map[string]interface{}{
+		"query": graphql.String(queryString),
 		"first": graphql.Int(batchSize),
-		"org":   graphql.String(organization),
 	}
 
 	err := (*client).Query("OrganizationRepositories", &query, variables)
@@ -69,42 +107,41 @@ func getOrganizationRepositories(client *api.GQLClient, organization string, bat
 	}
 
 	repositories := make([]string, 0)
-	for _, node := range query.Organization.Repositories.Nodes {
-		repositories = append(repositories, node.Name)
+	for _, r := range query.Search.Repos {
+		repositories = append(repositories, r.Repo.Name)
 	}
-	return repositories, query.Organization.Repositories.TotalCount, query.Organization.Repositories.PageInfo.EndCursor, nil
+	return repositories, query.Search.RepositoryCount, query.Search.PageInfo.EndCursor, nil
 }
 
-func getOrganizationRepositoriesAfter(client *api.GQLClient, organization string, after string, batchSize int) ([]string, string, error) {
+func getOrganizationRepositoriesAfter(client *api.GQLClient, queryString string, batchSize int, after string) ([]string, string, error) {
 	var query struct {
-		Organization struct {
-			Repositories struct {
-				TotalCount int
-				PageInfo   struct {
-					StartCursor string
-					EndCursor   string
-				}
-				Nodes []struct {
-					Name string
-				}
-			} `graphql:"repositories(first: $first, after: $after)"`
-		} `graphql:"organization(login: $org)"`
+		Search struct {
+			PageInfo struct {
+				StartCursor string
+				EndCursor   string
+			}
+			RepositoryCount int
+			Repos           []struct {
+				Repo struct {
+					RepositoryFragment `graphql:"... on Repository"`
+				} `graphql:"repo: node"`
+			} `graphql:"repos: edges"`
+		} `graphql:"search(type: REPOSITORY, query: $query, first: $first, after: $after)"`
 	}
-
 	variables := map[string]interface{}{
+		"query": graphql.String(queryString),
 		"first": graphql.Int(batchSize),
-		"org":   graphql.String(organization),
 		"after": graphql.String(after),
 	}
 
-	err := (*client).Query("OrganizationRepositories", &query, variables)
+	err := (*client).Query("OrganizationRepositoriesAfter", &query, variables)
 	if err != nil {
 		return nil, "", err
 	}
 
 	repositories := make([]string, 0)
-	for _, node := range query.Organization.Repositories.Nodes {
-		repositories = append(repositories, node.Name)
+	for _, r := range query.Search.Repos {
+		repositories = append(repositories, r.Repo.Name)
 	}
-	return repositories, query.Organization.Repositories.PageInfo.EndCursor, nil
+	return repositories, query.Search.PageInfo.EndCursor, nil
 }
