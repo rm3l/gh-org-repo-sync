@@ -19,7 +19,7 @@ var nbRepos int
 func main() {
 	start := time.Now()
 	defer func() {
-		log.Println("[info] done handling", nbRepos, "repositories in", time.Now().Sub(start))
+		log.Println("[info] done handling", nbRepos, "repositories in", time.Since(start))
 	}()
 
 	var dryRun bool
