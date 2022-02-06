@@ -25,7 +25,7 @@ const (
 // Otherwise, it clones it.
 func HandleRepository(dryRun bool, output, organization string, repositoryInfo github.RepositoryInfo, protocol CloneProtocol) error {
 	repository := repositoryInfo.Name
-	repoPath, err := filepath.Abs(filepath.FromSlash(fmt.Sprintf("%s/%s", output, repository)))
+	repoPath, err := safeAbsPath(fmt.Sprintf("%s/%s", output, repository))
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func HandleRepository(dryRun bool, output, organization string, repositoryInfo g
 				return nil
 			}
 			log.Println("[debug] cloning repo because local folder not found:", repoPath)
-			if err := clone(output, organization, repository, protocol); err != nil {
+			if err := clone(repoPath, organization, repository, protocol); err != nil {
 				return err
 			}
 			return nil
@@ -52,11 +52,10 @@ func HandleRepository(dryRun bool, output, organization string, repositoryInfo g
 		return nil
 	}
 	log.Println("[debug] updating local clone for repo:", repoPath)
-	return updateLocalClone(output, organization, repositoryInfo)
+	return updateLocalClone(repoPath, organization, repositoryInfo)
 }
 
 func clone(output, organization string, repository string, protocol CloneProtocol) error {
-	repoPath := fmt.Sprintf("%s/%s", output, repository)
 	var repoUrl string
 	if protocol == SystemProtocol {
 		repoUrl = fmt.Sprintf("%s/%s", organization, repository)
@@ -67,6 +66,10 @@ func clone(output, organization string, repository string, protocol CloneProtoco
 	} else {
 		return fmt.Errorf("unknown protocol for cloning: %s", protocol)
 	}
+	repoPath, err := safeAbsPath(output)
+	if err != nil {
+		return err
+	}
 	args := []string{"repo", "clone", repoUrl, repoPath}
 	_, stdErr, err := gh.Exec(args...)
 	if stdErrString := stdErr.String(); stdErrString != "" {
@@ -75,10 +78,13 @@ func clone(output, organization string, repository string, protocol CloneProtoco
 	return err
 }
 
-func updateLocalClone(output, organization string, repositoryInfo github.RepositoryInfo) error {
+func updateLocalClone(outputPath, organization string, repositoryInfo github.RepositoryInfo) error {
 	repository := repositoryInfo.Name
-	repoPath := fmt.Sprintf("%s/%s", output, repository)
-	err := fetchAllRemotes(repoPath)
+	repoPath, err := safeAbsPath(outputPath)
+	if err != nil {
+		return err
+	}
+	err = fetchAllRemotes(repoPath)
 	if err != nil {
 		log.Println("[warn]", err)
 	}
@@ -91,27 +97,32 @@ func updateLocalClone(output, organization string, repositoryInfo github.Reposit
 	return err
 }
 
-func fetchAllRemotes(repoPath string) error {
-	r, err := git.PlainOpen(repoPath)
-	var errorReturned error
+func fetchAllRemotes(outputPath string) error {
+	repoPath, err := safeAbsPath(outputPath)
 	if err != nil {
-		errorReturned = err
-	} else {
-		remotes, err := r.Remotes()
-		if err != nil {
-			errorReturned = err
-		} else {
-			var wg sync.WaitGroup
-			wg.Add(len(remotes))
-			for _, remote := range remotes {
-				go func(rem *git.Remote) {
-					defer wg.Done()
-					log.Printf("[debug] fetching remote '%s' in %s", rem.Config().Name, repoPath)
-					_ = rem.Fetch(&git.FetchOptions{Depth: 0, Tags: git.AllTags})
-				}(remote)
-			}
-			wg.Wait()
-		}
+		return err
 	}
-	return errorReturned
+	r, err := git.PlainOpen(repoPath)
+	if err != nil {
+		return err
+	}
+	remotes, err := r.Remotes()
+	if err != nil {
+		return err
+	}
+	var wg sync.WaitGroup
+	wg.Add(len(remotes))
+	for _, remote := range remotes {
+		go func(rem *git.Remote) {
+			defer wg.Done()
+			log.Printf("[debug] fetching remote '%s' in %s", rem.Config().Name, repoPath)
+			_ = rem.Fetch(&git.FetchOptions{Depth: 0, Tags: git.AllTags})
+		}(remote)
+	}
+	wg.Wait()
+	return nil
+}
+
+func safeAbsPath(p string) (string, error) {
+	return filepath.Abs(filepath.FromSlash(p))
 }
