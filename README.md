@@ -36,7 +36,7 @@ Options:
         the protocol to use for cloning. Possible values: system, ssh, https. (default "system")
   -query string
         GitHub search query, to filter the Organization repositories.
-        Example: "language:Go stars:>10 pushed:>2010-11-12"
+        Example: "language:Java stars:>10 pushed:>2010-11-12"
         See https://bit.ly/3HurHe3 for more details on the search syntax
 ```
 
