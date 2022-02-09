@@ -1,4 +1,4 @@
-package repo_sync
+package reposync
 
 import (
 	"errors"
