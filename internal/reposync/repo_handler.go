@@ -15,9 +15,17 @@ import (
 type CloneProtocol string
 
 const (
+	// SystemProtocol indicates whether to use the Git protocol configured in the GitHub CLI,
+	// e.g., via the 'gh config set git_protocol' configuration command
 	SystemProtocol CloneProtocol = "system"
-	SSHProtocol    CloneProtocol = "ssh"
-	HTTPSProtocol  CloneProtocol = "https"
+
+	// SSHProtocol forces this extension to clone repositories via SSH.
+	// As such, the Git remote will look like: git@github.com:org/repo.git
+	SSHProtocol CloneProtocol = "ssh"
+
+	// HTTPSProtocol  forces this extension to clone repositories via HTTPS.
+	// As such, the Git remote will look like: https://github.com/org/repo.git
+	HTTPSProtocol CloneProtocol = "https"
 )
 
 // HandleRepository determines whether a directory with the repository name does exist.
