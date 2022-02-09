@@ -7,6 +7,7 @@ import (
 	"os/exec"
 )
 
+// RunGhCliInDir runs any gh command in the specified working directory
 func RunGhCliInDir(workingDir string, env []string, args ...string) (stdOut, stdErr bytes.Buffer, err error) {
 	ghPath, err := safeexec.LookPath("gh")
 	if err != nil {
