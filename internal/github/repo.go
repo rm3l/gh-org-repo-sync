@@ -10,8 +10,12 @@ import (
 	"time"
 )
 
+// RepositoryInfo contains few details about a given repository
 type RepositoryInfo struct {
-	Name    string
+	// Name is the repository name
+	Name string
+
+	// IsEmpty determines whether the GitHub repository is empty or not
 	IsEmpty bool
 }
 
@@ -72,6 +76,7 @@ func GetOrganizationRepos(organization string, query string, batchSize int) ([]R
 	return orgRepositories, nil
 }
 
+// RepositoryFragment is exported so as to be used in GraphQL APIs
 type RepositoryFragment struct {
 	Name    string
 	IsEmpty bool
