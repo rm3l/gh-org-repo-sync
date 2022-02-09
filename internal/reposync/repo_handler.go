@@ -12,6 +12,8 @@ import (
 	"sync"
 )
 
+// CloneProtocol indicates the Git protocol to use for cloning.
+// See the constants exported in this package for further details.
 type CloneProtocol string
 
 const (
