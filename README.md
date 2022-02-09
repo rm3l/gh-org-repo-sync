@@ -11,8 +11,8 @@
 ## Installation
 
 - Install the `gh` CLI. See [https://github.com/cli/cli#installation](https://github.com/cli/cli#installation) for further details.
-- Run `gh auth login` to authenticate with your GitHub account. Alternatively, the CLI will respect the `GITHUB_TOKEN` [environment variable](https://cli.github.com/manual/gh_help_environment).
-- Install this extension:
+- To be able to clone private repos you have access to inside the Organization, authenticate with your GitHub account by running `gh auth login`. Alternatively, the CLI will respect the `GITHUB_TOKEN` [environment variable](https://cli.github.com/manual/gh_help_environment).
+- Install the extension:
 
 ```bash
 gh extension install rm3l/gh-org-repo-sync
@@ -54,7 +54,8 @@ gh extension install .
 # At this point, you can start using it
 gh org-repo-sync <my-organization>
 
-# To see changes in the code as you develop, simply build and use the extension:
+# To see changes in the code as you develop,
+# simply build and use the extension:
 go build && gh org-repo-sync <my-organization>
 ```
 
