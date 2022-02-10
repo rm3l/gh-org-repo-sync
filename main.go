@@ -46,6 +46,13 @@ See https://bit.ly/3HurHe3 for more details on the search syntax`)
 		fmt.Println("Options: ")
 		flag.PrintDefaults()
 	}
+	
+	if len(os.Args) < 2 {
+		//goland:noinspection GoUnhandledErrorResult
+		fmt.FPrintln(os.Stderr, "missing organization")
+		flag.Usage()
+		os.Exit(1)
+	}
 
 	organization := os.Args[1]
 
