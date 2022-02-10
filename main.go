@@ -49,7 +49,7 @@ See https://bit.ly/3HurHe3 for more details on the search syntax`)
 	
 	if len(os.Args) < 2 {
 		//goland:noinspection GoUnhandledErrorResult
-		fmt.FPrintln(os.Stderr, "missing organization")
+		fmt.Fprintln(os.Stderr, "missing organization")
 		flag.Usage()
 		os.Exit(1)
 	}
