@@ -4,12 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cli/go-gh"
-	"github.com/go-git/go-git/v5"
+	"github.com/rm3l/gh-org-repo-sync/internal/cli"
 	"github.com/rm3l/gh-org-repo-sync/internal/github"
 	"log"
 	"os"
 	"path/filepath"
-	"sync"
 )
 
 // CloneProtocol indicates the Git protocol to use for cloning.
@@ -112,25 +111,9 @@ func fetchAllRemotes(outputPath string) error {
 	if err != nil {
 		return err
 	}
-	r, err := git.PlainOpen(repoPath)
-	if err != nil {
-		return err
-	}
-	remotes, err := r.Remotes()
-	if err != nil {
-		return err
-	}
-	var wg sync.WaitGroup
-	wg.Add(len(remotes))
-	for _, remote := range remotes {
-		go func(rem *git.Remote) {
-			defer wg.Done()
-			log.Printf("[debug] fetching remote '%s' in %s", rem.Config().Name, repoPath)
-			_ = rem.Fetch(&git.FetchOptions{Depth: 0, Tags: git.AllTags})
-		}(remote)
-	}
-	wg.Wait()
-	return nil
+	args := []string{"fetch", "--all", "--prune", "--tags", "--recurse-submodules"}
+	_, _, err = cli.RunCommandInDir("git", repoPath, nil, args...)
+	return err
 }
 
 func safeAbsPath(p string) (string, error) {

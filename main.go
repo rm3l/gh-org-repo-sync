@@ -46,7 +46,7 @@ See https://bit.ly/3HurHe3 for more details on the search syntax`)
 		fmt.Println("Options: ")
 		flag.PrintDefaults()
 	}
-	
+
 	if len(os.Args) < 2 {
 		//goland:noinspection GoUnhandledErrorResult
 		fmt.Fprintln(os.Stderr, "missing organization")
@@ -89,7 +89,7 @@ See https://bit.ly/3HurHe3 for more details on the search syntax`)
 			defer wg.Done()
 			err := reposync.HandleRepository(dryRun, output, organization, repo, cloneProtocol)
 			if err != nil {
-				log.Println("[warn] an error occurred while handling repo", repo, err)
+				log.Println("[warn] an error occurred while handling repo", repo.Name, err)
 			}
 		}(repository)
 	}

@@ -11,6 +11,7 @@
 ## Installation
 
 - Install the `gh` CLI. See [https://github.com/cli/cli#installation](https://github.com/cli/cli#installation) for further details.
+- If not done already, also install [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) of course.
 - To be able to clone private repos you have access to inside the Organization, authenticate with your GitHub account by running `gh auth login`. Alternatively, the CLI will respect the `GITHUB_TOKEN` [environment variable](https://cli.github.com/manual/gh_help_environment).
 - Install the extension:
 
