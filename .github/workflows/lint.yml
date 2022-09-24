@@ -13,19 +13,26 @@ permissions:
   pull-requests: read
 jobs:
   golangci:
-    strategy:
-      matrix:
-        go-version: [1.17.x]
-        os: [ubuntu-latest, macos-latest, windows-latest]
     name: lint
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
+
+      - name: Install asdf dependencies
+        uses: asdf-vm/actions/install@v1
+
+      - name: Read the right version of golangci-lint
+        id: golangci_lint_version
+        run: |
+          golangCiLintVersion=$(grep '^golangci-lint ' .tool-versions | awk '{print $2}')
+          echo "::set-output name=golangCiLintVersion::${golangCiLintVersion}"
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3.2.0
         with:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: "v1.44.0"
+          version: v${{ steps.golangci_lint_version.outputs.golangCiLintVersion }}
           # Optional: working directory, useful for monorepos
           # working-directory: somedir
 
