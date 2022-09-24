@@ -43,20 +43,32 @@ Options:
 
 ## Working with the source code
 
-- If not done already, download and install [Go](https://go.dev/doc/install) to build the project
-- Clone the repository and install the local version.
+1. Clone the repository:
+
+```
+git clone https://github.com/rm3l/gh-org-repo-sync
+cd gh-org-repo-sync
+```
+
+2. Download and install [Go](https://go.dev/doc/install) to build the project.
+   Or if you are already using the [asdf](https://asdf-vm.com/) version manager, you can just run `asdf install` to install all the necessary tools (declared in the [.tool-versions](.tool-versions) file).
+
+3. Install the local version of this extension; `gh` symlinks to your local source code directory.
 
 ```bash
-cd gh-org-repo-sync
-
 # Install the local version
 gh extension install .
+```
 
-# At this point, you can start using it
+4. At this point, you can start using it:
+
+```bash
 gh org-repo-sync <my-organization>
+```
 
-# To see changes in the code as you develop,
-# simply build and use the extension:
+5. To see changes in the code as you develop, simply build and use the extension
+
+```bash
 go build && gh org-repo-sync <my-organization>
 ```
 
