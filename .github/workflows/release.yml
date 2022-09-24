@@ -11,6 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: Read the right version of Go
+        id: golang_version
+        run: |
+          golangVersion=$(grep '^golang ' .tool-versions | awk '{print $2}')
+          echo "::set-output name=golangVersion::${golangVersion}"
+
       - uses: cli/gh-extension-precompile@v1
         with:
-          go_version: "1.17"
+          go_version: ${{ steps.golang_version.outputs.golangVersion }}
