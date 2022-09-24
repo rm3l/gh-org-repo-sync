@@ -1,6 +1,7 @@
 package reposync
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/cli/go-gh"
@@ -32,7 +33,7 @@ const (
 // HandleRepository determines whether a directory with the repository name does exist.
 // If it does, it checks out its default branch and updates it locally.
 // Otherwise, it clones it.
-func HandleRepository(dryRun bool, output, organization string, repositoryInfo github.RepositoryInfo, protocol CloneProtocol) error {
+func HandleRepository(_ context.Context, dryRun bool, output, organization string, repositoryInfo github.RepositoryInfo, protocol CloneProtocol) error {
 	repository := repositoryInfo.Name
 	repoPath, err := safeAbsPath(fmt.Sprintf("%s/%s", output, repository))
 	if err != nil {
@@ -95,7 +96,7 @@ func updateLocalClone(outputPath, organization string, repositoryInfo github.Rep
 	}
 	err = fetchAllRemotes(repoPath)
 	if err != nil {
-		log.Println("[warn]", err)
+		return err
 	}
 	if repositoryInfo.IsEmpty {
 		log.Printf("[warn] skipped syncing empty repo: %s. Only remotes have been fetched\n", repoPath)

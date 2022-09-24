@@ -1,14 +1,15 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"github.com/rm3l/gh-org-repo-sync/internal/github"
 	"github.com/rm3l/gh-org-repo-sync/internal/reposync"
+	"golang.org/x/sync/errgroup"
 	"log"
 	"os"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -82,16 +83,20 @@ See https://bit.ly/3HurHe3 for more details on the search syntax`)
 		return
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(nbRepos)
+	g, ctx := errgroup.WithContext(context.Background())
 	for _, repository := range repositories {
-		go func(repo github.RepositoryInfo) {
-			defer wg.Done()
-			err := reposync.HandleRepository(dryRun, output, organization, repo, cloneProtocol)
-			if err != nil {
-				log.Println("[warn] an error occurred while handling repo", repo.Name, err)
+		g.Go(func(repo github.RepositoryInfo) func() error {
+			return func() error {
+				err := reposync.HandleRepository(ctx, dryRun, output, organization, repo, cloneProtocol)
+				if err != nil {
+					log.Println(fmt.Sprintf("[warn] an error occurred while handling repo %q:", repo.Name), err)
+				}
+				return err
 			}
-		}(repository)
+		}(repository))
 	}
-	wg.Wait()
+
+	if err := g.Wait(); err != nil {
+		panic(err)
+	}
 }
