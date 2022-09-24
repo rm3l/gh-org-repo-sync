@@ -94,9 +94,9 @@ Caution: this will hard-reset the branch of the destination repository to match 
 			return func() error {
 				err := reposync.HandleRepository(ctx, dryRun, output, organization, repo, cloneProtocol, force)
 				if err != nil {
-					log.Println(fmt.Sprintf("[warn] an error occurred while handling repo %q:", repo.Name), err)
+					return fmt.Errorf("error while handling repo %q: %w", repo.Name, err)
 				}
-				return err
+				return nil
 			}
 		}(repository))
 	}
