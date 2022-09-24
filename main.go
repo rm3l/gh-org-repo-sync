@@ -28,6 +28,7 @@ func main() {
 	var batchSize int
 	var output string
 	var protocol string
+	var force bool
 	flag.BoolVar(&dryRun, "dry-run", false,
 		`dry run mode. to display the repos that will get cloned or updated, 
 without actually performing those actions`)
@@ -41,6 +42,10 @@ See https://bit.ly/3HurHe3 for more details on the search syntax`)
 		fmt.Sprintf("the protocol to use for cloning. Possible values: %s, %s, %s.", reposync.SystemProtocol,
 			reposync.SSHProtocol, reposync.HTTPSProtocol))
 	flag.StringVar(&output, "output", ".", "the output path")
+	flag.BoolVar(&force, "force", false,
+		`whether to force sync repositories.
+Caution: this will hard-reset the branch of the destination repository to match the source repository.`)
+
 	flag.Usage = func() {
 		//goland:noinspection GoUnhandledErrorResult
 		fmt.Fprintln(os.Stderr, "Usage: gh org-repo-sync <organization> [options]")
@@ -87,7 +92,7 @@ See https://bit.ly/3HurHe3 for more details on the search syntax`)
 	for _, repository := range repositories {
 		g.Go(func(repo github.RepositoryInfo) func() error {
 			return func() error {
-				err := reposync.HandleRepository(ctx, dryRun, output, organization, repo, cloneProtocol)
+				err := reposync.HandleRepository(ctx, dryRun, output, organization, repo, cloneProtocol, force)
 				if err != nil {
 					log.Println(fmt.Sprintf("[warn] an error occurred while handling repo %q:", repo.Name), err)
 				}

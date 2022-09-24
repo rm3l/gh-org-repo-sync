@@ -33,7 +33,15 @@ const (
 // HandleRepository determines whether a directory with the repository name does exist.
 // If it does, it checks out its default branch and updates it locally.
 // Otherwise, it clones it.
-func HandleRepository(_ context.Context, dryRun bool, output, organization string, repositoryInfo github.RepositoryInfo, protocol CloneProtocol) error {
+func HandleRepository(
+	_ context.Context,
+	dryRun bool,
+	output,
+	organization string,
+	repositoryInfo github.RepositoryInfo,
+	protocol CloneProtocol,
+	force bool,
+) error {
 	repository := repositoryInfo.Name
 	repoPath, err := safeAbsPath(fmt.Sprintf("%s/%s", output, repository))
 	if err != nil {
@@ -62,7 +70,7 @@ func HandleRepository(_ context.Context, dryRun bool, output, organization strin
 		return nil
 	}
 	log.Println("[debug] updating local clone for repo:", repoPath)
-	return updateLocalClone(repoPath, organization, repositoryInfo)
+	return updateLocalClone(repoPath, organization, repositoryInfo, force)
 }
 
 func clone(output, organization string, repository string, protocol CloneProtocol) error {
@@ -88,13 +96,13 @@ func clone(output, organization string, repository string, protocol CloneProtoco
 	return err
 }
 
-func updateLocalClone(outputPath, organization string, repositoryInfo github.RepositoryInfo) error {
+func updateLocalClone(outputPath, organization string, repositoryInfo github.RepositoryInfo, force bool) error {
 	repository := repositoryInfo.Name
 	repoPath, err := safeAbsPath(outputPath)
 	if err != nil {
 		return err
 	}
-	err = fetchAllRemotes(repoPath)
+	err = fetchAllRemotes(repoPath, force)
 	if err != nil {
 		return err
 	}
@@ -103,16 +111,22 @@ func updateLocalClone(outputPath, organization string, repositoryInfo github.Rep
 		return nil
 	}
 	args := []string{"repo", "sync", "--source", fmt.Sprintf("%s/%s", organization, repository)}
+	if force {
+		args = append(args, "--force")
+	}
 	_, _, err = github.RunGhCliInDir(repoPath, nil, args...)
 	return err
 }
 
-func fetchAllRemotes(outputPath string) error {
+func fetchAllRemotes(outputPath string, force bool) error {
 	repoPath, err := safeAbsPath(outputPath)
 	if err != nil {
 		return err
 	}
 	args := []string{"fetch", "--all", "--prune", "--tags", "--recurse-submodules"}
+	if force {
+		args = append(args, "--force")
+	}
 	_, _, err = cli.RunCommandInDir("git", repoPath, nil, args...)
 	return err
 }
