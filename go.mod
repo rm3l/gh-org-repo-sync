@@ -1,6 +1,6 @@
 module github.com/rm3l/gh-org-repo-sync
 
-go 1.17
+go 1.19
 
 require (
 	github.com/cli/go-gh v0.1.0
