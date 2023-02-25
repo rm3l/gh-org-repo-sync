@@ -6,7 +6,7 @@ require (
 	github.com/cli/go-gh v1.1.0
 	github.com/cli/safeexec v1.0.1
 	github.com/cli/shurcooL-graphql v0.0.3
-	golang.org/x/sync v0.0.0-20220923202941-7f9b1623fab7
+	golang.org/x/sync v0.1.0
 )
 
 require (
