@@ -3,7 +3,7 @@ module github.com/rm3l/gh-org-repo-sync
 go 1.19
 
 require (
-	github.com/cli/go-gh v1.2.0
+	github.com/cli/go-gh v1.2.1
 	github.com/cli/safeexec v1.0.1
 	github.com/cli/shurcooL-graphql v0.0.3
 	golang.org/x/sync v0.1.0
