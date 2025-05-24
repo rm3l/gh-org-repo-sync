@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/cli/go-gh"
-	"github.com/rm3l/gh-org-repo-sync/internal/cli"
-	"github.com/rm3l/gh-org-repo-sync/internal/github"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/cli/go-gh"
+	"github.com/rm3l/gh-org-repo-sync/internal/cli"
+	"github.com/rm3l/gh-org-repo-sync/internal/github"
 )
 
 // CloneProtocol indicates the Git protocol to use for cloning.
@@ -75,13 +76,14 @@ func HandleRepository(
 
 func clone(output, organization string, repository string, protocol CloneProtocol) error {
 	var repoUrl string
-	if protocol == SystemProtocol {
+	switch protocol {
+	case SystemProtocol:
 		repoUrl = fmt.Sprintf("%s/%s", organization, repository)
-	} else if protocol == SSHProtocol {
+	case SSHProtocol:
 		repoUrl = fmt.Sprintf("git@github.com:%s/%s.git", organization, repository)
-	} else if protocol == HTTPSProtocol {
+	case HTTPSProtocol:
 		repoUrl = fmt.Sprintf("https://github.com/%s/%s.git", organization, repository)
-	} else {
+	default:
 		return fmt.Errorf("unknown protocol for cloning: %s", protocol)
 	}
 	repoPath, err := safeAbsPath(output)
