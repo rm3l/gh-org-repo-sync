@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: gh-org-repo-sync
+  annotations:
+    github.com/project-slug: rm3l/gh-org-repo-sync
+spec:
+  type: other
+  lifecycle: unknown
+  owner: user:development/guest
