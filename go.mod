@@ -1,12 +1,12 @@
 module github.com/rm3l/gh-org-repo-sync
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/cli/go-gh v1.2.1
 	github.com/cli/safeexec v1.0.1
 	github.com/cli/shurcooL-graphql v0.0.4
-	golang.org/x/sync v0.19.0
+	golang.org/x/sync v0.20.0
 )
 
 require (
